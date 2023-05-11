@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 using WebLab2.Models;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,6 +21,10 @@ namespace WebLab2.Controllers
             _context = context;
         }
         // GET: api/test/list
+        /// <summary>
+        /// API для получения листа тестов
+        /// </summary>
+        /// <returns>Лист Test</returns>
         [HttpGet("list")]
         public async Task<ActionResult<IEnumerable<Test>>> GetAllTests()
         {
@@ -27,6 +32,11 @@ namespace WebLab2.Controllers
         }
 
         // GET api/test/<id>
+        /// <summary>
+        /// API для получения теста по ключу
+        /// </summary>
+        /// <param name="id">Ключ для доступа к тесту</param>
+        /// <returns>Test</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Test>> GetTest(int id)
         {
@@ -39,7 +49,13 @@ namespace WebLab2.Controllers
         }
 
         // POST api/test
+        /// <summary>
+        /// API для добавления теста
+        /// </summary>
+        /// <param name="test">Модель Test для добавления в БД</param>
+        /// <returns>Созданный Test</returns>
         [HttpPost]
+        [Authorize(Roles ="admin,moderator")]
         public async Task<ActionResult<Test>> PostTest([FromBody] Test test)
         {
             if (!ModelState.IsValid)
@@ -52,7 +68,14 @@ namespace WebLab2.Controllers
         }
 
         // PUT api/test/<id>
-        [HttpPut("{id}")]
+        /// <summary>
+        /// API для изменения теста
+        /// </summary>
+        /// <param name="id">Ключ для доступа к тесту</param>
+        /// <param name="test">Модель Test для изменения в БД</param>
+        /// <returns>Ошибку, в случае отсутствия вопроса в БД</returns>
+        [HttpPut("id={id}")]
+        [Authorize(Roles = "admin,moderator")]
         public async Task<IActionResult> PutTest(int id, Test test)
         {
             if (id != test.Id)
@@ -84,7 +107,13 @@ namespace WebLab2.Controllers
         }
 
         // DELETE api/test/id=<id>
+        /// <summary>
+        /// API для удаления теста
+        /// </summary>
+        /// <param name="id">Ключ для доступа к тесту</param>
+        /// <returns>Ошибку, в случае отсутствия вопроса в БД</returns>
         [HttpDelete("id={id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteTest(int id)
         {
             var test = await _context.Tests.FindAsync(id);

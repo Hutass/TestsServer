@@ -4,6 +4,11 @@ namespace WebLab2.Data
 {
     public class TestBaseDbContextSeed
     {
+        /// <summary>
+        /// Заполняет базу данных начальными значениями, если они в ней отсутствуют
+        /// </summary>
+        /// <param name="context">контекст базы данных</param>
+        /// <returns></returns>
         public static async Task SeedAsync(TestBaseDbContext context)
         {
             try

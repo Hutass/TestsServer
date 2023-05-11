@@ -16,6 +16,11 @@ namespace WebLab2.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+        /// <summary>
+        /// API для осуществления регистрации пользователя
+        /// </summary>
+        /// <param name="model">Модель регистрации пользователя</param>
+        /// <returns>В случае успеха имя пользователя, иначе сообщение ошибки</returns>
         [HttpPost]
         [Route("api/account/register")]
         [AllowAnonymous]
@@ -28,6 +33,8 @@ namespace WebLab2.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // Установка роли User
+                    await _userManager.AddToRoleAsync(user, "user");
                     // Установка куки
                     await _signInManager.SignInAsync(user, false);
                     return Ok(new { message = "Добавлен новый пользователь: " + user.UserName });
@@ -59,9 +66,13 @@ namespace WebLab2.Controllers
 
             }
         }
+        /// <summary>
+        /// API для осуществления авторизации пользователя
+        /// </summary>
+        /// <param name="model">Модель представления пользователя</param>
+        /// <returns>В случае успеха имя пользователя и его роль, иначе сообщение ошибки</returns>
         [HttpPost]
         [Route("api/account/login")]
-        //[AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
             if (ModelState.IsValid)
@@ -70,8 +81,10 @@ namespace WebLab2.Controllers
                 await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
-                    User usefr = await GetCurrentUserAsync();
-                    return Ok(new { message = "Выполнен вход", userName = model.Email });                  
+                    var user = await _userManager.FindByEmailAsync(model.Email);
+                    IList<string>? roles = await _userManager.GetRolesAsync(user);
+                    string? userRole = roles.FirstOrDefault();
+                    return Ok(new { message = "Выполнен вход", userName = model.Email, userRole });
                 }
                 else
                 {
@@ -94,6 +107,10 @@ namespace WebLab2.Controllers
                 return Created("", errorMsg);
             }
         }
+        /// <summary>
+        /// API для осуществления выхода пользователя
+        /// </summary>
+        /// <returns>В случае успеха имя пользователя, иначе сообщение ошибки</returns>
         [HttpPost]
         [Route("api/account/logoff")]
         public async Task<IActionResult> LogOff()
@@ -107,6 +124,10 @@ namespace WebLab2.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Выполнен выход", userName = usr.UserName });
         }
+        /// <summary>
+        /// API для осуществления проверки авторизации пользователя
+        /// </summary>
+        /// <returns>В случае успеха имя пользователя и его роль, иначе сообщение ошибки</returns>
         [HttpGet]
         [Route("api/account/isauthenticated")]
         public async Task<IActionResult> IsAuthenticated()
@@ -116,7 +137,9 @@ namespace WebLab2.Controllers
             {
                 return Unauthorized(new { message = "Вы Гость. Пожалуйста, выполните вход" });
             }
-            return Ok(new { message = "Сессия активна", userName = usr.UserName });
+            IList<string> roles = await _userManager.GetRolesAsync(usr);
+            string? userRole = roles.FirstOrDefault();
+            return Ok(new { message = "Сессия активна", userName = usr.UserName, userRole = userRole });
 
 
 

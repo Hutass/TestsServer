@@ -18,7 +18,6 @@
     <Compile Remove="Migrations\20230331132030_UserEdit.cs" />
     <Compile Remove="Migrations\20230331132030_UserEdit.Designer.cs" />
     <Compile Remove="Migrations\TestBaseDbContextModelSnapshot.cs" />
-    <Compile Remove="Startup.cs" />
     <Compile Remove="TestController.cs" />
     <Compile Remove="WeatherForecastController.cs" />
   </ItemGroup>
@@ -36,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
